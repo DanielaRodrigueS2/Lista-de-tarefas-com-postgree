@@ -5,15 +5,16 @@ const bodyParser = require('body-parser');
 const app = express();
 const engine = mustache();
 
-app.engine("mustache", engine);
-app.set("views", path.join(__dirname, "views"));
-app.set("view engine", "mustache");
+app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-app.get('/', (req,res) =>{
-    res.render('template');
+app.get('/tarefas', (req,res) =>{
+    res.sendFile(path.join(__dirname, 'public', 'template.html'));
+});
+
+app.get('/teste',(req,res)=>{
 });
 
 app.listen(3000, () =>
