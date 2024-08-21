@@ -1,17 +1,27 @@
 const express = require('express');
-const mustache = require('mustache-express');
 const path = require('path');
 const bodyParser = require('body-parser');
 const app = express();
-const engine = mustache();
+
+//banco de dados
+const {Client} = require('pg');
+const client = new Client({
+    host:"localhost",
+    user:"postgres",
+    port: 5432,
+    password: "postgres",
+    database:"lista"
+})
+
 
 app.use(express.static(path.join(__dirname, 'public')));
+app.set('view engine', 'ejs')
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 app.get('/tarefas', (req,res) =>{
-    res.sendFile(path.join(__dirname, 'public', 'template.html'));
+    res.render("template")
 });
 
 app.get('/teste',(req,res)=>{
