@@ -15,28 +15,30 @@
 
         window.onload = () => {
 
+            async function coletaTarefas() {
+                try {
+                    const resposta = await fetch('/tarefas');
+                    lista = await resposta.json();
+                    atualizar();  // Chame a função para atualizar a interface
+                } 
+                catch (err) {
+                    console.error('Erro ao carregar tarefas:', err);
+                }
+            }
+            
             const add1 = document.getElementById("Btn1")
             const add2 = document.getElementById("Btn2")
             const btn_insere = document.getElementById("btnConfirma")
-            let lista = new Array()
 
-            if (window.localStorage.getItem("lista_tarefas")) {
-                let lista = JSON.parse(localStorage.getItem("lista_tarefas"))
-            }
-            else {
-                window.localStorage.setItem("lista_tarefas", JSON.stringify(lista))
-            }
+            let lista = []
 
             function atualizar() {
-                lista = JSON.parse(window.localStorage.getItem("lista_tarefas"));
                 document.getElementById("val_1").innerHTML = "";
                 document.getElementById("val_2").innerHTML = "";
                 lista.forEach(tarefa => preenche(tarefa));
             }
 
-            if (lista != null && lista !== undefined) {
-                atualizar()
-            }
+            coletaTarefas();
 
             function preenche(tarefa) {
 
@@ -110,7 +112,6 @@
             }
 
             add1.onclick = function () {
-                console.log("Entrou")
                 const btn_insere = document.getElementById("btnConfirma")
                 const popUp = document.getElementById("janela_popUp")
                 popUp.style.visibility = "visible"
@@ -129,23 +130,28 @@
                 }
             }
 
-            function insere(e, valor) {
+            async function insere(e, valor) {
                 e.preventDefault()
                 const nome = document.getElementById("camp_nome").value
                 const desc = document.getElementById("camp_desc").value
                 const data = document.getElementById("camp_data").value
 
-                lista.push({
-                    nome: nome,
-                    desc: desc,
-                    data: data,
-                    valor: valor
+                const novaTarefa = {nome, desc, data, valor}
+
+                const resposta = await fetch('/tarefas', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(novaTarefa),
                 })
 
-                window.localStorage.setItem("lista_tarefas", JSON.stringify(lista))
-                const popUp = document.querySelector("#janela_popUp")
-                popUp.style.visibility = "hidden"
-                atualizar()
+                const tarefaCriada = await resposta.json();
+                lista.push(tarefaCriada);
+                atualizar();
+                const popUp = document.querySelector("#janela_popUp");
+                popUp.style.visibility = "hidden";
+                
 
             }
 
@@ -161,7 +167,6 @@
                 const menub3 = document.getElementById("menuBtn3")
 
                 menu_tarefas.style.visibility = "visible"
-                const lista = JSON.parse(window.localStorage.getItem("lista_tarefas"))
                 const tarefa = lista.find(item => item.nome === nome)
 
                 menu_nome.innerHTML = tarefa.nome
@@ -169,23 +174,35 @@
                 menu_data.innerHTML = tarefa.data
 
 
-                menub1.onclick = function () {
-                    tarefa.valor = 2
-                    window.localStorage.setItem("lista_tarefas", JSON.stringify(lista))
+                menub1.onclick = async function () {
+                    tarefa.valor = 2;
+                    try {
+                        await fetch(`/tarefas/${tarefa.id}`, {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify(tarefa),
+                        });
+                        menu_tarefas.style.visibility = "hidden";
+                        atualizar();
+                    } catch (err) {
+                        console.error('Erro ao atualizar tarefa:', err);
+                    }
                     menu_tarefas.style.visibility = "hidden"
                     atualizar()
                 }
 
-                menub2.onclick = function () {
-                    const lista = JSON.parse(window.localStorage.getItem("lista_tarefas"))
-                    for (let i = 0; i < lista.length; i++) {
-                        if (lista[i].nome === nome) {
-                            lista.splice(i, 1)
-                            window.localStorage.setItem("lista_tarefas", JSON.stringify(lista))
-                            menu_tarefas.style.visibility = "hidden"
-                            atualizar()
-                            break
-                        }
+                menub2.onclick = async function () {
+                    try {
+                        await fetch(`/tarefas/${tarefa.id}`, {
+                            method: 'DELETE',
+                        });
+                        lista = lista.filter(item => item.nome !== nome);
+                        menu_tarefas.style.visibility = "hidden";
+                        atualizar();
+                    } catch (err) {
+                        console.error('Erro ao remover tarefa:', err);
                     }
 
                 }
@@ -195,7 +212,9 @@
                 }
 
             }
+            coletaTarefas();
         }
+
 
     </script>
 
