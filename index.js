@@ -30,7 +30,7 @@ app.get('/tarefas', async (req, res) => {
         res.json(result.rows);
     } catch (err) {
         console.error(err);
-        res.status(500).send('Erro ao buscar tarefas');
+        res.status(500).send('Erro select');
     }
 });
 
@@ -45,7 +45,7 @@ app.post('/tarefas', async (req, res) => {
         res.json(result.rows[0]);
     } catch (err) {
         console.error(err);
-        res.status(500).send('Erro ao adicionar tarefa');
+        res.status(500).send('Erro insert');
     }
 });
 
@@ -61,7 +61,7 @@ app.put('/tarefas/:id', async (req, res) => {
         res.json(result.rows[0]);
     } catch (err) {
         console.error(err);
-        res.status(500).send('Erro ao atualizar tarefa');
+        res.status(500).send('Erro uṕdate');
     }
 });
 
@@ -73,7 +73,7 @@ app.delete('/tarefas/:id', async (req, res) => {
         res.sendStatus(204);
     } catch (err) {
         console.error(err);
-        res.status(500).send('Erro ao deletar tarefa');
+        res.status(500).send('Erro delete');
     }
 });
 
